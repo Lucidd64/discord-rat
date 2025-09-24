@@ -142,7 +142,7 @@ def get_IPV4():
         print(f"Error retrieving IPv4 address: {e}")
         return "Unknown IP"
     
-def get_location(): 
+def get_location():
     try:
         if is_user_admin():
             try:
@@ -179,7 +179,46 @@ def get_location():
         output = result.stdout.strip()
         if ',' in output and 'IsUnknown' not in output and len(output) > 5:
             lat, lon = output.split(',')
-            return f"GPS: {float(lat):.6f}, {float(lon):.6f}"
+            try:
+                response = requests.get(f'https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=18&addressdetails=1', 
+                                      headers={'User-Agent': 'LocationBot/1.0'}, timeout=5)
+                if response.status_code == 200:
+                    data = response.json()
+                    if 'address' in data:
+                        addr = data['address']
+                        house_number = addr.get('house_number', '')
+                        road = addr.get('road', '')
+                        city = addr.get('city') or addr.get('town') or addr.get('village')
+                        state = addr.get('state')
+                        
+                        street = f"{house_number} {road}".strip()
+                        if street and city and state:
+                            return f"{street}, {city}, {state} | {float(lat):.6f}, {float(lon):.6f}"
+                        elif street and city:
+                            return f"{street}, {city} | {float(lat):.6f}, {float(lon):.6f}"
+            except:
+                pass
+            
+            try:
+                response = requests.get(f'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude={lat}&longitude={lon}&localityLanguage=en', timeout=5)
+                if response.status_code == 200:
+                    data = response.json()
+                    street_number = data.get('streetNumber', '')
+                    street_name = data.get('streetName', '')
+                    city = data.get('city', '')
+                    
+                    if street_number and street_name:
+                        full_street = f"{street_number} {street_name}"
+                        if city:
+                            return f"{full_street}, {city} | {float(lat):.6f}, {float(lon):.6f}"
+                        else:
+                            return f"{full_street} | {float(lat):.6f}, {float(lon):.6f}"
+                    elif street_name and city:
+                        return f"{street_name}, {city} | {float(lat):.6f}, {float(lon):.6f}"
+            except:
+                pass
+            
+            return f"GPS Coordinates: {float(lat):.6f}, {float(lon):.6f}"
     except:
         pass
     
@@ -187,7 +226,16 @@ def get_location():
         response = requests.get('http://ip-api.com/json/', timeout=5)
         data = response.json()
         if data['status'] == 'success':
-            return f"{data['city']}, {data['regionName']}, {data['country']}"
+            lat = data.get('lat')
+            lon = data.get('lon')
+            city = data.get('city')
+            region = data.get('regionName')
+            country = data.get('country')
+            address = f"{city}, {region}, {country}"
+            if lat and lon:
+                return f"{address} | {lat}, {lon}"
+            else:
+                return address
     except:
         pass
     
@@ -195,7 +243,16 @@ def get_location():
         response = requests.get('https://ipapi.co/json/', timeout=5)
         data = response.json()
         if 'city' in data and data['city']:
-            return f"{data['city']}, {data['region']}, {data['country_name']}"
+            lat = data.get('latitude')
+            lon = data.get('longitude')
+            city = data.get('city')
+            region = data.get('region')
+            country = data.get('country_name')
+            address = f"{city}, {region}, {country}"
+            if lat and lon:
+                return f"{address} | {lat}, {lon}"
+            else:
+                return address
     except:
         pass
     
