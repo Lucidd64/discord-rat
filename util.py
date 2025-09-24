@@ -22,7 +22,6 @@ def get_user_name():
         return "Unknown User"
     
 def get_hwid():
-    """Get HWID using multiple methods"""
     try:
         wmic_path = os.path.join(os.environ.get('WINDIR', 'C:\\Windows'), 'System32', 'wbem', 'wmic.exe')
         if os.path.exists(wmic_path):
@@ -62,7 +61,6 @@ def get_hwid():
     return None
 
 def get_cpu_name():
-    """Get CPU name using multiple methods"""
     try:
         wmic_path = os.path.join(os.environ.get('WINDIR', 'C:\\Windows'), 'System32', 'wbem', 'wmic.exe')
         if os.path.exists(wmic_path):
@@ -102,7 +100,6 @@ def get_cpu_name():
     return None
 
 def get_cpu_id():
-    """Get CPU ID using multiple methods"""
     try:
         wmic_path = os.path.join(os.environ.get('WINDIR', 'C:\\Windows'), 'System32', 'wbem', 'wmic.exe')
         if os.path.exists(wmic_path):
@@ -145,9 +142,7 @@ def get_IPV4():
         print(f"Error retrieving IPv4 address: {e}")
         return "Unknown IP"
     
-def get_location():
-    """Get device location from most accurate to least accurate method"""
-    
+def get_location(): 
     try:
         if is_user_admin():
             try:
