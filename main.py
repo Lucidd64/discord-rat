@@ -23,4 +23,4 @@ async def on_ready():
     print(f"Location: {util.get_location()}")
     print('--------------------------')
 
-bot.run("MTQyMDE4MjcwNDkwOTA2MjI4Ng.GTEHIP.zlV71-r2CbMXmW_GL-sM1XdK_7oRMV2Jdx7c-g")
+bot.run("")
