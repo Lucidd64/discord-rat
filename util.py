@@ -23,7 +23,6 @@ def get_user_name():
     
 def get_hwid():
     """Get HWID using multiple methods"""
-    # Method 1: Try wmic with full path
     try:
         wmic_path = os.path.join(os.environ.get('WINDIR', 'C:\\Windows'), 'System32', 'wbem', 'wmic.exe')
         if os.path.exists(wmic_path):
@@ -37,7 +36,6 @@ def get_hwid():
     except Exception as e:
         print(f"WMIC method failed: {e}")
     
-    # Method 2: Try PowerShell
     try:
         ps_command = "(Get-WmiObject -Class Win32_ComputerSystemProduct).UUID"
         result = subprocess.run(['powershell', '-Command', ps_command], 
@@ -48,7 +46,6 @@ def get_hwid():
     except Exception as e:
         print(f"PowerShell method failed: {e}")
     
-    # Method 3: Try registry
     try:
         with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 
                            r"SOFTWARE\Microsoft\Cryptography") as key:
@@ -57,7 +54,6 @@ def get_hwid():
     except Exception as e:
         print(f"Registry method failed: {e}")
     
-    # Method 4: Fallback to node UUID
     try:
         return str(uuid.uuid1())
     except Exception as e:
@@ -67,7 +63,6 @@ def get_hwid():
 
 def get_cpu_name():
     """Get CPU name using multiple methods"""
-    # Method 1: Try wmic with full path
     try:
         wmic_path = os.path.join(os.environ.get('WINDIR', 'C:\\Windows'), 'System32', 'wbem', 'wmic.exe')
         if os.path.exists(wmic_path):
@@ -81,7 +76,6 @@ def get_cpu_name():
     except Exception as e:
         print(f"WMIC CPU name failed: {e}")
     
-    # Method 2: Try PowerShell
     try:
         ps_command = "(Get-WmiObject -Class Win32_Processor).Name"
         result = subprocess.run(['powershell', '-Command', ps_command], 
@@ -92,7 +86,6 @@ def get_cpu_name():
     except Exception as e:
         print(f"PowerShell CPU name failed: {e}")
     
-    # Method 3: Try registry
     try:
         with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 
                            r"HARDWARE\DESCRIPTION\System\CentralProcessor\0") as key:
@@ -101,7 +94,6 @@ def get_cpu_name():
     except Exception as e:
         print(f"Registry CPU name failed: {e}")
     
-    # Method 4: Fallback to platform
     try:
         return platform.processor()
     except Exception as e:
@@ -111,7 +103,6 @@ def get_cpu_name():
 
 def get_cpu_id():
     """Get CPU ID using multiple methods"""
-    # Method 1: Try wmic with full path
     try:
         wmic_path = os.path.join(os.environ.get('WINDIR', 'C:\\Windows'), 'System32', 'wbem', 'wmic.exe')
         if os.path.exists(wmic_path):
@@ -125,7 +116,6 @@ def get_cpu_id():
     except Exception as e:
         print(f"WMIC CPU ID failed: {e}")
     
-    # Method 2: Try PowerShell
     try:
         ps_command = "(Get-WmiObject -Class Win32_Processor).ProcessorId"
         result = subprocess.run(['powershell', '-Command', ps_command], 
@@ -136,7 +126,6 @@ def get_cpu_id():
     except Exception as e:
         print(f"PowerShell CPU ID failed: {e}")
     
-    # Method 3: Try registry
     try:
         with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 
                            r"HARDWARE\DESCRIPTION\System\CentralProcessor\0") as key:
@@ -159,33 +148,26 @@ def get_IPV4():
 def get_location():
     """Get device location from most accurate to least accurate method"""
     
-    # Method 1: Windows Location Service with auto-enable attempt
     try:
-        # First check if we have admin rights
         if is_user_admin():
-            # Try to enable location service via registry
             try:
                 import winreg
-                # Enable location service
                 with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 
                                   r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location",
                                   0, winreg.KEY_SET_VALUE) as key:
                     winreg.SetValueEx(key, "Value", 0, winreg.REG_SZ, "Allow")
                 
-                # Enable for current user
                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, 
                                   r"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location",
                                   0, winreg.KEY_SET_VALUE) as key:
                     winreg.SetValueEx(key, "Value", 0, winreg.REG_SZ, "Allow")
                     
-                # Enable location service in system
                 subprocess.run(['powershell', '-Command', 
                               'Set-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PolicyManager\\default\\System\\AllowLocation" -Name "value" -Value 1'], 
                               capture_output=True, text=True)
             except:
-                pass  # Registry changes failed, continue anyway
+                pass
         
-        # Try to get GPS location
         ps_command = """
         Add-Type -AssemblyName System.Device
         $GeoWatcher = New-Object System.Device.Location.GeoCoordinateWatcher
@@ -206,7 +188,6 @@ def get_location():
     except:
         pass
     
-    # Method 2: IP Geolocation (most reliable fallback)
     try:
         response = requests.get('http://ip-api.com/json/', timeout=5)
         data = response.json()
@@ -215,7 +196,6 @@ def get_location():
     except:
         pass
     
-    # Method 3: Alternative IP service
     try:
         response = requests.get('https://ipapi.co/json/', timeout=5)
         data = response.json()
@@ -224,7 +204,6 @@ def get_location():
     except:
         pass
     
-    # Method 4: Timezone-based approximation
     try:
         ps_command = "(Get-TimeZone).Id"
         result = subprocess.run(['powershell', '-Command', ps_command], 
