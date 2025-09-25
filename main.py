@@ -14,7 +14,7 @@ token = ""
 async def on_ready():
     if not util.is_user_admin():
         try:
-                        util.elevate_process()
+            util.elevate_process()
 
         except Exception as e:
             print(f"Failed to elevate process: {e}")
