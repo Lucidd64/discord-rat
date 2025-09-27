@@ -268,6 +268,6 @@ async def on_message(message):
     await bot.process_commands(message)
 
 if token == "":
-    print("Please add your Discord bot token")
+    print("Please add your bot token")
 else:
     bot.run(token)
