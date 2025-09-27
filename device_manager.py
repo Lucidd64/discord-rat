@@ -45,7 +45,7 @@ def should_execute(user_id):
 
 def get_all_targets():
     if not active_targets:
-        return "No active targets set"
+        return "No active targets set."
     
     result = "Active Targets:\n"
     for user_id, target in active_targets.items():
