@@ -8,7 +8,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-token = "MTQyMDE4MjcwNDkwOTA2MjI4Ng.Gknq6h.WiwtYSbLV7RYAEATfk5qTiu8yat-NUccK1ISmU"
+token = ""
 
 async def start(ctx):
     await ctx.channel.send(f'Logged in as {bot.user}')
